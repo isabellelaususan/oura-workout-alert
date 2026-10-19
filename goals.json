@@ -1,0 +1,10 @@
+{
+  "timezone": "Asia/Bangkok",
+  "goals": [
+    { "name": "Weights",        "times_per_week": 1, "matches": ["weight", "strength"] },
+    { "name": "Spin",           "times_per_week": 1, "matches": ["spin", "cycling"] },
+    { "name": "Pilates/Lagree", "times_per_week": 1, "matches": ["pilates", "lagree", "reformer"] },
+    { "name": "Tennis",         "times_per_week": 1, "matches": ["tennis"] },
+    { "name": "Hyrox/HIIT",     "times_per_week": 1, "matches": ["hyrox", "hiit", "interval", "crossfit", "functional", "bootcamp"] }
+  ]
+}
