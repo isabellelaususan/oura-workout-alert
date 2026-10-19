@@ -1,0 +1,43 @@
+name: Check Oura workouts
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"  # every 15 minutes (GitHub can run it a few minutes late)
+  workflow_dispatch:         # adds a "Run workflow" button for testing
+
+concurrency:
+  group: oura-check          # never run two checks at once
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # state.json remembers your latest Oura login and which workouts
+      # you've already been pinged about. GitHub keeps it between runs.
+      - name: Load saved state
+        uses: actions/cache/restore@v4
+        with:
+          path: state.json
+          key: oura-state-${{ github.run_id }}
+          restore-keys: oura-state-
+
+      - name: Check for new workouts
+        run: python check_workouts.py
+        env:
+          OURA_CLIENT_ID: ${{ secrets.OURA_CLIENT_ID }}
+          OURA_CLIENT_SECRET: ${{ secrets.OURA_CLIENT_SECRET }}
+          OURA_REFRESH_TOKEN: ${{ secrets.OURA_REFRESH_TOKEN }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+
+      - name: Save state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state.json
+          key: oura-state-${{ github.run_id }}
