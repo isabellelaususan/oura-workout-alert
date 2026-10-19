@@ -1,0 +1,17 @@
+# Privacy Policy: Oura Workout Alert
+
+_Last updated: October 19, 2026_
+
+Oura Workout Alert is a personal, non-commercial project used only by its creator, Isabelle Laususan.
+
+**What it accesses:** workout data from the Oura API (activity type, time, duration, calories, distance and intensity). Nothing else.
+
+**How it's used:** only to send the owner a notification about their own workouts and their progress against their weekly fitness goals.
+
+**Where it's stored:** a small state file kept in a private GitHub repository. It holds the Oura login token and the IDs of workouts already notified about. Workout data is not stored long-term.
+
+**Sharing:** data is never sold or shared. Notification text is sent through the ntfy.sh service to the owner's own phone.
+
+**Deleting data:** revoke the app's access in your Oura account settings at any time. This stops all access immediately.
+
+**Contact:** isabellelaususan@gmail.com
