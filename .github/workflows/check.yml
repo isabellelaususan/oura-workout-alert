@@ -2,7 +2,9 @@ name: Check Oura workouts
 
 on:
   schedule:
-    - cron: "*/15 * * * *"  # every 15 minutes (GitHub can run it a few minutes late)
+    # Every 15 minutes, offset from :00/:15/:30/:45 when GitHub is busiest
+    # and most likely to skip scheduled runs.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:         # adds a "Run workflow" button for testing
 
 concurrency:
