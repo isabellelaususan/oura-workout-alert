@@ -8,6 +8,7 @@ OURA_REFRESH_TOKEN, NTFY_TOPIC.
 """
 
 import datetime as dt
+import hashlib
 import json
 import os
 import time
@@ -44,6 +45,14 @@ def post_form(url, fields):
 
 def get_access_token(state):
     """Reuse the saved access token, or swap the refresh token for a new one."""
+    # A new OURA_REFRESH_TOKEN secret means you logged in again (e.g. with a
+    # different account), so forget the old saved login and use the new one.
+    secret_id = hashlib.sha256(os.environ["OURA_REFRESH_TOKEN"].encode()).hexdigest()
+    if state.get("secret_id") != secret_id:
+        for key in ("access_token", "expires_at", "refresh_token"):
+            state.pop(key, None)
+        state["secret_id"] = secret_id
+
     if state.get("access_token") and state.get("expires_at", 0) > time.time() + 60:
         return state["access_token"]
 
