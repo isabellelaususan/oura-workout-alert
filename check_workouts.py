@@ -64,6 +64,7 @@ def get_access_token(state):
         state["access_token"] = tokens["access_token"]
         state["expires_at"] = time.time() + tokens.get("expires_in", 3600)
         state["refresh_token"] = tokens.get("refresh_token", refresh_token)
+        print(f"Refreshed Oura login. Permissions granted: {tokens.get('scope', 'not stated')}")
         save_state(state)  # save right away so a new refresh token is never lost
         return state["access_token"]
 
@@ -85,17 +86,25 @@ def week_start():
     return today - dt.timedelta(days=today.weekday())  # Monday
 
 
-def fetch_workouts(access_token):
+def fetch_workouts(access_token, start=None):
     today = dt.date.today()
-    start = min(week_start(), today - dt.timedelta(days=DAYS_TO_LOOK_BACK))
-    query = urllib.parse.urlencode({
-        "start_date": start.isoformat(),
-        "end_date": (today + dt.timedelta(days=1)).isoformat(),
-    })
+    start = start or min(week_start(), today - dt.timedelta(days=DAYS_TO_LOOK_BACK))
+    end = today + dt.timedelta(days=1)
+    query = urllib.parse.urlencode({"start_date": start.isoformat(),
+                                    "end_date": end.isoformat()})
     req = urllib.request.Request(f"{WORKOUT_URL}?{query}",
                                  headers={"Authorization": f"Bearer {access_token}"})
     with urllib.request.urlopen(req) as resp:
-        return json.load(resp)["data"]
+        data = json.load(resp)["data"]
+    print(f"Asked Oura for workouts from {start} to {end} ({dt.datetime.now():%H:%M} local): got {len(data)}")
+    return data
+
+
+def log_recent_workouts(access_token):
+    """When nothing comes back, look further back so the log shows what Oura has."""
+    recent = fetch_workouts(access_token, dt.date.today() - dt.timedelta(days=30))
+    for w in recent:
+        print(f"  {w['day']}  {w.get('activity')}  source={w.get('source')}")
 
 
 def describe(workout):
@@ -169,6 +178,8 @@ def main():
     state = load_state()
     access_token = get_access_token(state)
     workouts = fetch_workouts(access_token)
+    if not workouts:
+        log_recent_workouts(access_token)
 
     first_run = "seen" not in state
     seen = state.get("seen", {})  # workout id -> day, so we never ping twice
