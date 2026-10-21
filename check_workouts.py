@@ -109,13 +109,6 @@ def fetch_workouts(access_token, start=None):
     return data
 
 
-def log_recent_workouts(access_token):
-    """When nothing comes back, look further back so the log shows what Oura has."""
-    recent = fetch_workouts(access_token, dt.date.today() - dt.timedelta(days=30))
-    for w in recent:
-        print(f"  {w['day']}  {w.get('activity')}  source={w.get('source')}")
-
-
 def describe(workout):
     """Turn one Oura workout into a short message, e.g. 'Running · 42 min · 386 kcal'."""
     start = dt.datetime.fromisoformat(workout["start_datetime"])
@@ -187,8 +180,6 @@ def main():
     state = load_state()
     access_token = get_access_token(state)
     workouts = fetch_workouts(access_token)
-    if not workouts:
-        log_recent_workouts(access_token)
 
     first_run = "seen" not in state
     seen = state.get("seen", {})  # workout id -> day, so we never ping twice
